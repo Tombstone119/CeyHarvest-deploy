@@ -1,0 +1,56 @@
+# Render Blueprint for the CeyHarvest backend.
+#
+# The React frontend deploys to Vercel (see frontend/vercel.json) and the Flask
+# service in /ml-api is not deployed - the backend serves yield predictions from
+# its built-in estimator unless ML_API_URL is set.
+#
+# Secrets marked sync:false must be filled in from the Render dashboard.
+services:
+  - type: web
+    name: ceyharvest-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    region: singapore
+    healthCheckPath: /actuator/health
+    envVars:
+      # --- required ---------------------------------------------------------
+      # MongoDB Atlas connection string. Atlas Network Access must allow
+      # 0.0.0.0/0 because Render's outbound IPs are dynamic on the free plan.
+      - key: MONGODB_URI
+        sync: false
+
+      # HS256 signing key - must be at least 32 characters.
+      - key: JWT_SECRET
+        generateValue: true
+
+      # Origin of the deployed frontend, used for CORS and for links in emails.
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://ceyharvest.vercel.app
+      - key: FRONTEND_URL
+        value: https://ceyharvest.vercel.app
+
+      # --- safety -----------------------------------------------------------
+      # Must stay false: these endpoints seed and reset live data with no auth.
+      - key: DEV_ENDPOINTS_ENABLED
+        value: "false"
+
+      # --- optional integrations -------------------------------------------
+      # Gmail address + app password. Leave unset to disable outbound email.
+      - key: EMAIL_USERNAME
+        sync: false
+      - key: EMAIL_PASSWORD
+        sync: false
+
+      # Stripe. Leave unset to keep PaymentService in mock mode.
+      - key: STRIPE_PUBLISHABLE_KEY
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+
+      # External Flask model. Leave unset to use the built-in estimator.
+      - key: ML_API_URL
+        sync: false

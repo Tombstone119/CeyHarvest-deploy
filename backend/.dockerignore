@@ -1,0 +1,9 @@
+target/
+.mvn/wrapper/maven-wrapper.jar
+.env
+.idea/
+.vscode/
+*.iml
+HELP.md
+pom_backup.xml
+pom_fixed.xml
