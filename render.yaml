@@ -7,7 +7,7 @@
 # Secrets marked sync:false must be filled in from the Render dashboard.
 services:
   - type: web
-    name: ceyharvest-backend
+    name: ceyharvest-api-prod
     runtime: docker
     dockerfilePath: ./backend/Dockerfile
     dockerContext: ./backend
